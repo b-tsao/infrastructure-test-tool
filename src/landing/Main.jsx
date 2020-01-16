@@ -2,7 +2,6 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
 import NavBar from "../components/NavBar";
-import Footer from "../components/Footer";
 
 import Home from "../tabs/Home";
 
@@ -40,8 +39,6 @@ export default function Main() {
     <div className={classes.root}>
       <NavBar onClick={setMainDisplay} />
       <main className={classes.content}>{display}</main>
-      <Footer />
     </div>
   );
 }
-
