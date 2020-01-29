@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import NavBar from "../components/NavBar";
 
 import Home from "../tabs/Home";
+import Project from "../tabs/Project";
 
 import { MainDisplayContext } from "../Contexts";
 
@@ -28,6 +29,8 @@ export default function Main() {
 
   const display = (() => {
     switch (mainDisplay) {
+      case "Project":
+        return <Project />;
       case "Home":
         return <Home />;
       default:

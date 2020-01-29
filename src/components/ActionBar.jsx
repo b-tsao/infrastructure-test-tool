@@ -13,7 +13,17 @@ import { ThemeContext } from "../Contexts";
 export default function ActionBar(props) {
   const [theme, toggleTheme] = React.useContext(ThemeContext);
 
-  const tabs = [];
+  const tabs = [
+    <Button
+      key={"project"}
+      className={props.className}
+      onClick={() => {
+        props.onClick("Project");
+      }}
+    >
+      Project
+    </Button>
+  ];
 
   return (
     <React.Fragment>
@@ -29,4 +39,3 @@ ActionBar.propTypes = {
   onClick: PropTypes.func,
   className: PropTypes.string
 };
-
