@@ -13,12 +13,6 @@ const useStyles = makeStyles(theme => ({
     position: "relative",
     minHeight: "100vh",
     overflow: "hidden"
-  },
-  content: {
-    paddingBottom: "127px",
-    [theme.breakpoints.up("md")]: {
-      paddingBottom: "69px"
-    }
   }
 }));
 
@@ -41,7 +35,7 @@ export default function Main() {
   return (
     <div className={classes.root}>
       <NavBar onClick={setMainDisplay} />
-      <main className={classes.content}>{display}</main>
+      <main>{display}</main>
     </div>
   );
 }
