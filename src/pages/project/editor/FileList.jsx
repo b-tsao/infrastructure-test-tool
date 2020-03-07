@@ -81,7 +81,7 @@ const useStyles = makeStyles(theme => ({
     overflow: "auto"
   },
   item: {
-    "&:hover, &$expanded": {
+    "&:hover, &$focus": {
       "& + $action $options": {
         display: "block"
       },
@@ -91,22 +91,21 @@ const useStyles = makeStyles(theme => ({
     }
   },
   action: {
-    "&:hover $expand": {
-      display: "none"
-    }
-  },
-  options: {
-    display: "none",
     "&:hover, &$selected": {
-      display: "block"
+      "& $expand": {
+        display: "none"
+      },
+      "& $options": {
+        display: "block"
+      }
     }
   },
-  selected: {} /* Pseudo-class applied to the options element if `selected={true}`. */,
+  selected: {} /* Pseudo-class applied to the action element if `selected={true}`. */,
+  options: {
+    display: "none"
+  },
   expand: {
     display: "block"
-  },
-  expanded: {
-    backgroundColor: theme.palette.action.hover
   },
   focus: {
     backgroundColor: theme.palette.action.hover + " !important"
@@ -139,7 +138,11 @@ export default function FileList(props) {
       const req = new XMLHttpRequest();
 
       req.onreadystatechange = () => {
-        if (req.readyState === XMLHttpRequest.DONE && req.status === 200) {
+        if (
+          req.readyState === XMLHttpRequest.DONE &&
+          req.status === 200 &&
+          !file.path.endsWith("/")
+        ) {
           history.replace(`${url}?path=${repath}`);
         }
       };
@@ -257,7 +260,7 @@ export default function FileList(props) {
         <ListItem
           key={file.name}
           className={clsx(classes.item, {
-            [classes.expanded]: Boolean(anchorEl[file.path])
+            [classes.focus]: Boolean(anchorEl[file.path])
           })}
           focusVisibleClassName={classes.focus}
           style={{ paddingLeft: theme.spacing(2 * level) }}
@@ -280,15 +283,17 @@ export default function FileList(props) {
           ) : (
             <ListItemText primary={file.name} />
           )}
-          <ListItemSecondaryAction className={classes.action}>
+          <ListItemSecondaryAction
+            className={clsx(classes.action, {
+              [classes.selected]: selectedFile
+            })}
+          >
             {expandIcon}
             <IconButton
               size="small"
               edge="end"
               aria-label="actions"
-              className={clsx(classes.options, {
-                [classes.selected]: selectedFile
-              })}
+              className={classes.options}
               onClick={event => {
                 setAnchorEl({ ...anchorEl, [file.path]: event.currentTarget });
               }}

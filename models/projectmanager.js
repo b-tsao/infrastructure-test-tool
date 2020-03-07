@@ -11,6 +11,7 @@ const logger = log4js.getLogger("project-manager");
 const PROJECTS_PATH = path.join("public", "projects");
 const METADATA_FILE = "metadata.json";
 const FILES_DIRECTORY = "files";
+const TMP_DIRECTORY = "tmp";
 
 class ProjectManager {
   constructor() {
@@ -545,104 +546,115 @@ class ProjectManager {
         return cb(fErr);
       }
 
-      // Create the file system directory strucure of renamed file
-      const sepIdx = newProjectFilePath.lastIndexOf(path.sep);
-      const newFileName = newProjectFilePath.substring(sepIdx + 1);
-      fs.mkdir(
-        newProjectFilePath.substring(0, sepIdx),
-        { recursive: true },
-        mkErr => {
-          if (mkErr) {
-            logger.error("[rename]", mkErr.message);
-            return cb(mkErr);
-          }
+      // Move the file to tmp first
+      const tmpProjectPath = path.join(projectPath, TMP_DIRECTORY);
+      this._fsMoveFile(projectFilePath, tmpProjectPath, tmpMvErr => {
+        if (tmpMvErr) {
+          logger.error("[rename]", tmpMvErr.message);
+          return cb(tmpMvErr);
+        }
 
-          // Move the file in the file system
-          this._fsMoveFile(projectFilePath, newProjectFilePath, mvErr => {
-            if (mvErr) {
-              logger.error("[rename]", mvErr.message);
-              return cb(mvErr);
+        // Create the file system directory strucure of renamed file
+        const sepIdx = newProjectFilePath.lastIndexOf(path.sep);
+        const newFileName = newProjectFilePath.substring(sepIdx + 1);
+        fs.mkdir(
+          newProjectFilePath.substring(0, sepIdx),
+          { recursive: true },
+          mkErr => {
+            if (mkErr) {
+              logger.error("[rename]", mkErr.message);
+              return cb(mkErr);
             }
 
-            // Create the directory structure of the file to rename
-            const trimmedPath = this._trim(fileRepath, "/");
-            this._makePath(project, trimmedPath, (mErr, dir) => {
-              if (mErr) {
-                logger.error("[rename]", mErr.message);
-                return cb(mErr);
+            // Move the file from tmp to file system
+            this._fsMoveFile(tmpProjectPath, newProjectFilePath, mvErr => {
+              if (mvErr) {
+                logger.error("[rename]", mvErr.message);
+                return cb(mvErr);
               }
-              const fileName = trimmedPath.substring(
-                trimmedPath.lastIndexOf("/") + 1
-              );
-              if (dir.files.hasOwnProperty(fileName)) {
-                const err = new Error(
-                  "Project '" +
-                    name +
-                    "' file '" +
-                    filePath +
-                    "' -> '" +
-                    fileRepath +
-                    "': EEXIST, file already exists"
-                );
-                logger.error("[rename]", err.message);
-                return cb(err);
-              } else {
-                dir.files[fileName] = file;
-                delete directory.files[file.name];
 
-                file.name = fileName;
-                file.path = fileRepath;
-                if (file.path.endsWith("/")) {
-                  // If the file renamed is a directory, need to modify all the path of its children
-                  const recurseRepath = dir => {
-                    for (const f in dir.files) {
-                      const child = dir.files[f];
-                      const isDir = child.path.endsWith("/");
-                      child.path = `${file.path}${child.name}`;
-                      if (isDir) {
-                        child.path += "/";
-                        recurseRepath(child);
-                      }
-                    }
-                  };
+              // Delete the file from the file structure
+              delete directory.files[file.name];
 
-                  recurseRepath(file);
+              // Create the directory structure of the file to rename
+              const trimmedPath = this._trim(fileRepath, "/");
+              this._makePath(project, trimmedPath, (mErr, dir) => {
+                if (mErr) {
+                  logger.error("[rename]", mErr.message);
+                  return cb(mErr);
                 }
+                const fileName = trimmedPath.substring(
+                  trimmedPath.lastIndexOf("/") + 1
+                );
+                if (dir.files.hasOwnProperty(fileName)) {
+                  const err = new Error(
+                    "Project '" +
+                      name +
+                      "' file '" +
+                      filePath +
+                      "' -> '" +
+                      fileRepath +
+                      "': EEXIST, file already exists"
+                  );
+                  logger.error("[rename]", err.message);
+                  return cb(err);
+                } else {
+                  dir.files[fileName] = file;
 
-                // Find highest level directory that is empty and remove it from file structure
-                this._cleanPath(project, filePath, (cErr, emptyDir) => {
-                  this._writeProject(projectPath, project, wErr => {
-                    if (wErr) {
-                      logger.error("[rename]", wErr.message);
-                      return cb(wErr);
-                    }
-
-                    if (emptyDir != null) {
-                      // Delete the directory from the filesystem
-                      const emptyDirPath = path.join(
-                        projectPath,
-                        FILES_DIRECTORY,
-                        ...emptyDir.path.split("/")
-                      );
-                      rmdir(emptyDirPath, dErr => {
-                        if (dErr) {
-                          logger.error("[rename]", dErr.message);
-                          return cb(dErr);
+                  file.name = fileName;
+                  file.path = fileRepath;
+                  if (file.path.endsWith("/")) {
+                    // If the file renamed is a directory, need to modify all the path of its children
+                    const recurseRepath = dir => {
+                      for (const f in dir.files) {
+                        const child = dir.files[f];
+                        const isDir = child.path.endsWith("/");
+                        child.path = `${file.path}${child.name}`;
+                        if (isDir) {
+                          child.path += "/";
+                          recurseRepath(child);
                         }
+                      }
+                    };
+
+                    recurseRepath(file);
+                  }
+
+                  // Find highest level directory that is empty and remove it from file structure
+                  this._cleanPath(project, filePath, (cErr, emptyDir) => {
+                    this._writeProject(projectPath, project, wErr => {
+                      if (wErr) {
+                        logger.error("[rename]", wErr.message);
+                        return cb(wErr);
+                      }
+
+                      if (emptyDir != null) {
+                        // Delete the directory from the filesystem
+                        const emptyDirPath = path.join(
+                          projectPath,
+                          FILES_DIRECTORY,
+                          ...emptyDir.path.split("/")
+                        );
+                        rmdir(emptyDirPath, dErr => {
+                          if (dErr) {
+                            logger.error("[rename]", dErr.message);
+                            return cb(dErr);
+                          }
+                          this.emitter.emit(name);
+                          return cb();
+                        });
+                      } else {
                         this.emitter.emit(name);
                         return cb();
-                      });
-                    } else {
-                      this.emitter.emit(name);
-                      return cb();
-                    }
+                      }
+                    });
                   });
-                });
-              }
+                }
+              });
             });
-          });
-        }
-      );
+          }
+        );
+      });
     });
   }
 }
