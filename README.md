@@ -10,7 +10,8 @@ GET           /project
 POST        /project  
 DELETE   /project<sup>1</sup>  
 PUT           /project/file  
-DELETE   /project/file  
+DELETE   /project/file<sup>2</sup>    
+POST        /project/file/rename<sup>2</sup>  
 
 **Server Sent Events**  
 GET           /event/projects  
@@ -19,7 +20,10 @@ GET           /event/project
 **Websockets**  
 TODO Will be used for individual file editing for real time collaboration  
   
-<sup>1</sup>The DELETE project operation deactivates the project. Currently deactivated projects are permanently deleted upon server start.
+<sup>1</sup>The DELETE project operation deactivates the project. Currently deactivated projects are permanently deleted upon server start.  
+  
+<sup>2</sup>Rename and delete utilizes a dynamic directory feature where directories are created and deleted dynamically based on the file path. 
+If a directory is empty, it is removed. If a file indicates it is under a directory in the path and the directory does not exist, it is created.
   
 The file system structure for storing projects looks as follows (relative to **app** directory):
 
@@ -46,10 +50,10 @@ The **metadata.json** structure is as follow:
 > <em>Note</em>: Each project contains all the fields above in-memory, in addition to the following fields added upon load:
 >
 > - "path": <String> "Project path relative to app directory"
-> - "createdTime" <Date> Created time retrieved from **metadata.json** file stat created time
-> - "modifiedTime" <Date> Modified time retrieved from **metadata.json** file stat modified time
+> - "createdTime":<Date> Created time retrieved from **metadata.json** file stat created time
+> - "modifiedTime": <Date> Modified time retrieved from **metadata.json** file stat modified time
   
-The **<File>** structure is as follow:  
+The **File** structure is as follow:  
 {  
     "name": <String> File name,  
     "path": <String> File path relative to project path **files** directory<sup>1</sup>,  

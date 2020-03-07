@@ -89570,7 +89570,7 @@ const useStyles = Object(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_9__["
     overflow: "auto"
   },
   item: {
-    "&:hover, &$expanded": {
+    "&:hover, &$focus": {
       "& + $action $options": {
         display: "block"
       },
@@ -89580,24 +89580,23 @@ const useStyles = Object(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_9__["
     }
   },
   action: {
-    "&:hover $expand": {
-      display: "none"
-    }
-  },
-  options: {
-    display: "none",
     "&:hover, &$selected": {
-      display: "block"
+      "& $expand": {
+        display: "none"
+      },
+      "& $options": {
+        display: "block"
+      }
     }
   },
   selected: {}
-  /* Pseudo-class applied to the options element if `selected={true}`. */
+  /* Pseudo-class applied to the action element if `selected={true}`. */
   ,
+  options: {
+    display: "none"
+  },
   expand: {
     display: "block"
-  },
-  expanded: {
-    backgroundColor: theme.palette.action.hover
   },
   focus: {
     backgroundColor: theme.palette.action.hover + " !important"
@@ -89631,7 +89630,7 @@ function FileList(props) {
       const req = new XMLHttpRequest();
 
       req.onreadystatechange = () => {
-        if (req.readyState === XMLHttpRequest.DONE && req.status === 200) {
+        if (req.readyState === XMLHttpRequest.DONE && req.status === 200 && !file.path.endsWith("/")) {
           history.replace(`${url}?path=${repath}`);
         }
       };
@@ -89756,7 +89755,7 @@ function FileList(props) {
       listItems.push(react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_10__["ListItem"], {
         key: file.name,
         className: Object(clsx__WEBPACK_IMPORTED_MODULE_8__["default"])(classes.item, {
-          [classes.expanded]: Boolean(anchorEl[file.path])
+          [classes.focus]: Boolean(anchorEl[file.path])
         }),
         focusVisibleClassName: classes.focus,
         style: {
@@ -89780,14 +89779,14 @@ function FileList(props) {
       }) : react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_10__["ListItemText"], {
         primary: file.name
       }), react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_10__["ListItemSecondaryAction"], {
-        className: classes.action
+        className: Object(clsx__WEBPACK_IMPORTED_MODULE_8__["default"])(classes.action, {
+          [classes.selected]: selectedFile
+        })
       }, expandIcon, react__WEBPACK_IMPORTED_MODULE_5___default.a.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_10__["IconButton"], {
         size: "small",
         edge: "end",
         "aria-label": "actions",
-        className: Object(clsx__WEBPACK_IMPORTED_MODULE_8__["default"])(classes.options, {
-          [classes.selected]: selectedFile
-        }),
+        className: classes.options,
         onClick: event => {
           setAnchorEl({ ...anchorEl,
             [file.path]: event.currentTarget
