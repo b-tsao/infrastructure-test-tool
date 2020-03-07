@@ -1,13 +1,15 @@
 import React from "react";
 import clsx from "clsx";
+import PropTypes from "prop-types";
+import { useHistory, useRouteMatch } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { Grid } from "@material-ui/core";
 
-import Resizeable from "../components/Resizeable";
-import Actionbar from "./project/Actionbar";
-import NestedList from "./project/NestedList";
-import FileDetail from "./project/FileDetail";
-import LogView from "./project/LogView";
+import Resizeable from "../../components/Resizeable";
+import ActionBar from "./editor/ActionBar";
+import FileList from "./editor/FileList";
+import FileDetail from "./editor/FileDetail";
+import LogView from "./editor/LogView";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -50,19 +52,16 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Project() {
-  const classes = useStyles();
+export default function Editor(props) {
+  const { project, path, ...other } = props;
 
+  const { url } = useRouteMatch();
+  const classes = useStyles();
+  const history = useHistory();
+
+  // Console/log view
   const [logWidth, setLogWidth] = React.useState(320);
   const [logOpened, setLogOpened] = React.useState(false);
-
-  const dummyStruct = [
-    { dir1: ["file11", "file12"] },
-    { dir2: [{ dir21: ["file221", "file222"] }, "file22"] },
-    "file3",
-    "file4",
-    { dir5: [] }
-  ];
 
   const handleAction = action => {
     switch (action) {
@@ -77,20 +76,57 @@ export default function Project() {
     setLogWidth(width);
   };
 
-  const handleFileClick = file => {
-    console.log(file);
-  };
+  // File structure
+  const [files, setFiles] = React.useState([]);
+
+  //   const dummyFiles = [
+  //     {
+  //       name: "dir1",
+  //       path: "dir1",
+  //       type: "DIRECTORY",
+  //       files: [
+  //         { name: "file11", path: "dir1/file11", type: "FILE" },
+  //         { name: "file12", path: "dir1/file12", type: "FILE" }
+  //       ]
+  //     },
+  //     {
+  //       name: "dir2",
+  //       path: "dir2",
+  //       type: "DIRECTORY",
+  //       files: [
+  //         {
+  //           name: "dir21",
+  //           path: "dir2/dir21",
+  //           type: "DIRECTORY",
+  //           files: [
+  //             { name: "file221", path: "dir2/dir21/file221", type: "FILE" },
+  //             { name: "file222", path: "dir2/dir21/file222", type: "FILE" }
+  //           ]
+  //         },
+  //         { name: "file22", path: "dir2/file22", type: "FILE" }
+  //       ]
+  //     },
+  //     { name: "file3", path: "file3", type: "FILE" },
+  //     { name: "file4", path: "file4", type: "FILE" },
+  //     { name: "dir5", path: "dir5", type: "DIRECTORY", files: [] }
+  //   ];
+
+  //   project.files = dummyFiles;
 
   return (
     <div className={classes.root}>
-      <Actionbar handleAction={handleAction} logViewSelected={logOpened} />
+      <ActionBar
+        title={project.name}
+        handleAction={handleAction}
+        logViewSelected={logOpened}
+      />
       <div className={classes.workspace}>
         <Grid container spacing={4} className={classes.root}>
           <Grid item xs={12} md={3} lg={3}>
-            <NestedList
-              files={dummyStruct}
+            <FileList
               className={classes.list}
-              onClick={handleFileClick}
+              project={project}
+              selected={path}
             />
           </Grid>
           <Grid item xs={12} md={9} lg={9}>
@@ -112,3 +148,8 @@ export default function Project() {
     </div>
   );
 }
+
+Editor.propTypes = {
+  project: PropTypes.object.isRequired,
+  path: PropTypes.string
+};

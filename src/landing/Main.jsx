@@ -1,12 +1,14 @@
 import React from "react";
+import { Switch, Route, BrowserRouter as Router } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 
-import NavBar from "../components/NavBar";
+import NavBar from "../navigation/NavBar";
 
-import Home from "../tabs/Home";
-import Project from "../tabs/Project";
-
-import { MainDisplayContext } from "../Contexts";
+import Home from "../pages/Home";
+import Project from "../pages/Project";
+import NewProject from "../pages/project/New";
+import Documentation from "../pages/Documentation";
+import Construction from "../pages/Construction";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -17,25 +19,29 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function Main() {
-  const [mainDisplay, setMainDisplay] = React.useContext(MainDisplayContext);
-
   const classes = useStyles();
-
-  const display = (() => {
-    switch (mainDisplay) {
-      case "Project":
-        return <Project />;
-      case "Home":
-        return <Home />;
-      default:
-        return <Home />;
-    }
-  })();
 
   return (
     <div className={classes.root}>
-      <NavBar onClick={setMainDisplay} />
-      <main>{display}</main>
+      <Router>
+        <NavBar />
+        <main>
+          <Switch>
+            <Route path="/project/:id?">
+              <Project />
+            </Route>
+            <Route path="/new">
+              <NewProject />
+            </Route>
+            <Route path="/doc">
+              <Documentation />
+            </Route>
+            <Route path="/">
+              <Home />
+            </Route>
+          </Switch>
+        </main>
+      </Router>
     </div>
   );
 }

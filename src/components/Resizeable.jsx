@@ -43,7 +43,8 @@ export default function Resizeable(props) {
     right,
     bottom,
     left,
-    onResize
+    onResize,
+    ...other
   } = props;
 
   const classes = useStyles();

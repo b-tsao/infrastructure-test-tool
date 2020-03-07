@@ -7,6 +7,9 @@ import { AppBar, Button, Grid, Toolbar } from "@material-ui/core";
 import ActionBar from "./ActionBar";
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    zIndex: theme.zIndex.drawer + 1
+  },
   title: {
     float: "left",
     width: "288.56px",
@@ -39,23 +42,15 @@ export default function NavBar(props) {
   const classes = useStyles();
 
   return (
-    <AppBar position="relative" color="inherit">
+    <AppBar className={classes.root} position="relative" color="inherit">
       <Toolbar>
         <Grid container>
-          <Grid item xs={12} md={4} lg={4} className={classes.titleGrid}>
-          </Grid>
-          <Grid item xs={12} md={4} lg={4} className={classes.itemsGrid}>
-          </Grid>
-          <Grid item xs={12} md={4} lg={4} className={classes.itemsGrid}>
-            <ActionBar className={classes.menuItems} onClick={props.onClick} />
+          <Grid item xs={12} md={4} lg={4} className={classes.titleGrid}></Grid>
+          <Grid item xs={12} md={8} lg={8} className={classes.itemsGrid}>
+            <ActionBar className={classes.menuItems} />
           </Grid>
         </Grid>
       </Toolbar>
     </AppBar>
   );
 }
-
-NavBar.propTypes = {
-  onClick: PropTypes.func
-};
-
