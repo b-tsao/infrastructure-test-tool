@@ -14,7 +14,7 @@ function DescriptionTextField(props) {
 
   return (
     <TextField
-      id="outlined-multiline-static"
+      id="file-description"
       className={classes.description}
       label="Description"
       multiline

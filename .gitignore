@@ -2,3 +2,5 @@
 bundle.js.map
 # Dependency directories
 node_modules/
+# Project directory
+public/projects/

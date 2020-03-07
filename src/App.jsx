@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Route, BrowserRouter as Router } from "react-router-dom";
 
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { CssBaseline } from "@material-ui/core";
@@ -7,7 +6,7 @@ import { CssBaseline } from "@material-ui/core";
 /* Import Components */
 import Main from "./landing/Main";
 
-import { ThemeContext, MainDisplayContext } from "./Contexts";
+import { ThemeContext } from "./Contexts";
 
 export default function App() {
   const themeMode = localStorage.getItem("themeMode");
@@ -33,12 +32,8 @@ export default function App() {
   return (
     <MuiThemeProvider theme={muiTheme}>
       <ThemeContext.Provider value={[theme, toggleTheme]}>
-        <MainDisplayContext.Provider value={useState("home")}>
-          <CssBaseline />
-          <Router>
-            <Route exact path="/" component={Main} />
-          </Router>
-        </MainDisplayContext.Provider>
+        <CssBaseline />
+        <Main />
       </ThemeContext.Provider>
     </MuiThemeProvider>
   );
